@@ -10,8 +10,8 @@ WITH arrived_shipments AS (
     job_number,
     origin,
     destination,
-    trans,
-    mode,
+    transport,
+    load_type,
     eta,
     ata,
     DATE_ADD(eta, INTERVAL 1 DAY) AS sea_limit
@@ -22,18 +22,18 @@ lane_summary AS (
   SELECT
     origin,
     destination,
-    mode,
+    load_type,
     COUNT(*) AS arrived,
-    SUM(CASE WHEN (trans = 'SEA' AND ata <= sea_limit)
-               OR (trans = 'AIR' AND ata <= eta)
+    SUM(CASE WHEN (transport = 'SEA' AND ata <= sea_limit)
+               OR (transport = 'AIR' AND ata <= eta)
              THEN 1 ELSE 0 END) AS on_time
   FROM arrived_shipments
-  GROUP BY origin, destination, mode
+  GROUP BY origin, destination, load_type
 )
 SELECT
   origin,
   destination,
-  mode,
+  load_type,
   arrived,
   on_time,
   ROUND(on_time / arrived * 100, 1) AS on_time_pct

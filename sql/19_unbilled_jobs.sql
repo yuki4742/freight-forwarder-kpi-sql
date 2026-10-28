@@ -12,7 +12,7 @@ WITH unbilled_jobs AS (
     job_number,
     SUM(CASE WHEN ledger = 'AP' THEN 1 ELSE 0 END) AS ap_lines,
     SUM(CASE WHEN ledger = 'AR' THEN 1 ELSE 0 END) AS ar_lines,
-    SUM(CASE WHEN ledger = 'AP' THEN local_amount ELSE 0 END) AS ap_total_amount
+    SUM(CASE WHEN ledger = 'AP' THEN amount ELSE 0 END) AS ap_total_amount
   FROM charge_lines
   GROUP BY job_number
   HAVING SUM(CASE WHEN ledger = 'AP' THEN 1 ELSE 0 END) > 0

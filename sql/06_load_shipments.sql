@@ -10,13 +10,13 @@ CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(job_number, branch, department, job_opened_date, customer_code, customer_name,
- direction, trans, mode, origin, orig_ctry, destination, dest_ctry,
- carrier_code, carrier_name, @container_type, @container_count, @teu,
- weight, weight_uq, volume, volume_uq, chargeable, chargeable_uq,
- etd, @atd, eta, @ata)
-SET container_type  = NULLIF(@container_type, ''),
+(job_number, job_opened_date, branch, department, direction, transport, load_type,
+ customer_code, customer_name, carrier_code, carrier_name,
+ origin, origin_country, destination, destination_country,
+ etd, @atd, eta, @ata, @container_type, @container_count, @teu,
+ weight, weight_unit, volume, volume_unit, chargeable_qty, chargeable_unit)
+SET atd             = NULLIF(@atd, ''),
+    ata             = NULLIF(@ata, ''),
+    container_type  = NULLIF(@container_type, ''),
     container_count = NULLIF(@container_count, ''),
-    teu             = NULLIF(@teu, ''),
-    atd             = NULLIF(@atd, ''),
-    ata             = NULLIF(@ata, '');
+    teu             = NULLIF(@teu, '');

@@ -8,6 +8,5 @@ CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(line_id, creditor_debtor, creditor_debtor_full_name, ledger, type, branch,
- department, transaction_num, transaction_date, post_date, charge_code,
- currency, local_amount, job_number);
+(line_id, job_number, ledger, doc_type, doc_number, doc_date, posted_at,
+ branch, department, counterparty_code, counterparty_name, charge_code, currency, amount);

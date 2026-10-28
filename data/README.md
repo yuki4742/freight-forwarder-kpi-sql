@@ -1,8 +1,8 @@
 # Freight Forwarder KPI Dataset (Synthetic)
 
-A synthetic dataset for a **fictional freight forwarder headquartered in Seattle, WA**, built for a business KPI dashboard (profitability, schedule reliability, and billing health).
+A synthetic dataset for a **fictional freight forwarder headquartered in Seattle, WA**, built for a business KPI analysis (profitability, schedule reliability, and billing health).
 
-> **Disclaimer:** All data is synthetic. Every company, customer, carrier, and vendor name is fictional, and any resemblance to real organizations is coincidental. The dataset is not derived from any real company's data.
+> **Disclaimer:** All data is synthetic and was created for this project. It is not derived from any real company's data or from any commercial software. Field names and codes are generic industry terms. Every company, customer, carrier and vendor name is fictional, and any resemblance to real organizations is coincidental.
 
 ## At a glance
 
@@ -19,9 +19,9 @@ A synthetic dataset for a **fictional freight forwarder headquartered in Seattle
 
 | File | Grain | Description |
 |---|---|---|
-| `shipments.csv` | 1 row per shipment (job) | Shipment profile, cargo, carrier, and schedule (planned vs. actual) |
-| `charge_lines.csv` | 1 row per transaction charge line | AR invoices/credit notes, AP invoices/credit notes, and job journals (JRJ) |
-| `charge_codes.csv` | 1 row per charge code | Charge code master with a reporting group |
+| `shipments.csv` | 1 row per shipment (job) | Shipment profile, customer, carrier, route, and schedule (planned vs. actual) |
+| `charge_lines.csv` | 1 row per charge line | Customer invoices and credit notes (AR), carrier and vendor bills (AP), and inter-branch journals (JNL) |
+| `charge_codes.csv` | 1 row per charge code | Charge code list with a reporting group |
 
 ## Data model
 
@@ -37,52 +37,52 @@ shipments (1) ──< charge_lines (many) >── (1) charge_codes
 | Column | Type | Description |
 |---|---|---|
 | job_number | text (PK) | Shipment job number, `SHP-YYMM-####` |
-| branch | text | Handling branch: SEA / PDX / ANC |
-| department | text | FES (Forwarding Export Sea), FIS (Import Sea), FEA (Export Air), FIA (Import Air) |
 | job_opened_date | date | Date the job was opened |
-| customer_code / customer_name | text | Customer (local client) |
+| branch | text | Handling branch: SEA / PDX / ANC |
+| department | text | SEA_EXP, SEA_IMP, AIR_EXP, AIR_IMP |
 | direction | text | Import / Export |
-| trans | text | Transport: SEA / AIR |
-| mode | text | FCL / LCL / LSE (loose air cargo) |
+| transport | text | SEA / AIR |
+| load_type | text | FCL (full container), LCL (less than container), LOOSE (air cargo) |
+| customer_code / customer_name | text | Customer, `CUST###` |
+| carrier_code / carrier_name | text | Ocean carrier, airline, or LCL consolidator, `CARR###` |
 | origin / destination | text | UN/LOCODE (e.g., CNSHA Shanghai, USTIW Tacoma) |
-| orig_ctry / dest_ctry | text | ISO country code |
-| carrier_code / carrier_name | text | Ocean carrier, airline, or LCL co-loader |
+| origin_country / destination_country | text | ISO country code |
+| etd / atd | date | Estimated / actual time of departure |
+| eta / ata | date | Estimated / actual time of arrival. Empty `ata` = still in transit on the as-of date |
 | container_type | text | 20GP / 40HC (FCL only, otherwise empty) |
 | container_count | integer | Number of containers (FCL only) |
 | teu | integer | Twenty-foot equivalent units (FCL only) |
-| weight, weight_uq | number, text | Gross weight in KG |
-| volume, volume_uq | number, text | Volume in M3 |
-| chargeable, chargeable_uq | number, text | Chargeable quantity: KG for air, M3 for sea |
-| etd / atd | date | Estimated / actual time of departure |
-| eta / ata | date | Estimated / actual time of arrival. Empty `ata` = still in transit on the as-of date |
+| weight, weight_unit | number, text | Gross weight in KG |
+| volume, volume_unit | number, text | Volume in M3 |
+| chargeable_qty, chargeable_unit | number, text | Chargeable quantity: KG for air, M3 for sea |
 
 ## charge_lines.csv
 
 | Column | Type | Description |
 |---|---|---|
 | line_id | integer (PK) | Charge line ID |
-| creditor_debtor / creditor_debtor_full_name | text | Debtor (AR), creditor (AP), or `N/A` (JC) |
-| ledger | text | AR (receivables), AP (payables), JC (job costing) |
-| type | text | INV (invoice), CRD (credit note), JRJ (job journal) |
+| job_number | text (FK) | Shipment the line belongs to |
+| ledger | text | AR (receivables), AP (payables), JNL (inter-branch journal) |
+| doc_type | text | INV (invoice / bill), CRD (credit note), JNL (journal) |
+| doc_number | text | Document number: `INV-`, `CN-` (AR), `BILL-`, `BILLCN-` (AP), `JNL-` |
+| doc_date / posted_at | datetime | Document date and posting date |
 | branch / department | text | Branch and department the line is posted to |
-| transaction_num | text | Invoice / credit note / journal number |
-| transaction_date / post_date | datetime | Transaction date and posting date |
+| counterparty_code / counterparty_name | text | Customer (AR, `CUST###`), carrier or vendor (AP, `CARR###` / `VEND###`), or `N/A` (JNL) |
 | charge_code | text | See `charge_codes.csv` |
 | currency | text | USD |
-| local_amount | number | Amount in USD (sign convention below) |
-| job_number | text (FK) | Shipment the line belongs to |
+| amount | number | Amount in USD (sign convention below) |
 
 ### Sign convention
 
-| Ledger / type | Sign of `local_amount` |
+| Ledger / doc_type | Sign of `amount` |
 |---|---|
 | AR INV | positive (revenue) |
 | AR CRD | negative (reduces revenue) |
 | AP INV | positive (cost) |
 | AP CRD | negative (reduces cost) |
-| JC JRJ | debit = negative, credit = positive. Each journal nets to zero within a job; it only moves amounts between branches |
+| JNL JNL | debit = negative, credit = positive. Each journal nets to zero within a job; it only moves profit between branches |
 
-**Gross profit = SUM(AR) − SUM(AP) + SUM(JC)**
+**Gross profit = SUM(AR) − SUM(AP) + SUM(JNL)**
 
 ## charge_codes.csv
 
@@ -106,7 +106,7 @@ shipments (1) ──< charge_lines (many) >── (1) charge_codes
 ## Notes for analysis
 
 - **Completed shipments:** filter on `ata IS NOT NULL` for schedule KPIs. Recent shipments may not be fully invoiced yet (AR or AP still pending), which is normal work in progress.
-- **Timing of lines:** AR is invoiced after departure (export) or arrival (import). Carrier, trucker, and delay-related costs are invoiced later, so a job's figures can change after its first invoice.
+- **Timing of lines:** AR is invoiced after departure (export) or arrival (import). Carrier, trucker, and delay-related costs are billed later, so a job's figures can change after its first invoice.
 - **Suggested on-time definition:** sea `ata <= eta + 1 day`, air `ata <= eta`.
 - **Location codes:** USSEA Seattle, USTIW Tacoma, USPDX Portland, USANC Anchorage, CNSHA Shanghai, CNNGB Ningbo, CNPVG Shanghai Pudong (air), VNSGN Ho Chi Minh City, KRPUS Busan, KRICN Incheon (air), JPTYO Tokyo, JPYOK Yokohama, JPUKB Kobe, JPNRT Narita (air), TWKHH Kaohsiung, TWTPE Taipei (air).
 

@@ -11,22 +11,22 @@ WITH summary AS (
   SELECT
     s.origin,
     s.destination,
-    s.mode,
+    s.load_type,
     SUM(CASE WHEN c.ledger = 'AR' AND cc.charge_group = 'Delay-related'
-             THEN c.local_amount ELSE 0 END) AS delay_revenue,
+             THEN c.amount ELSE 0 END) AS delay_revenue,
     SUM(CASE WHEN c.ledger = 'AP' AND cc.charge_group = 'Delay-related'
-             THEN c.local_amount ELSE 0 END) AS delay_cost
+             THEN c.amount ELSE 0 END) AS delay_cost
   FROM charge_lines AS c
   JOIN shipments AS s
     ON c.job_number = s.job_number
   JOIN charge_codes AS cc
     ON c.charge_code = cc.charge_code
-  GROUP BY s.origin, s.destination, s.mode
+  GROUP BY s.origin, s.destination, s.load_type
 )
 SELECT
   origin,
   destination,
-  mode,
+  load_type,
   delay_revenue,
   delay_cost,
   ROUND(delay_revenue / delay_cost * 100, 1) AS recovery_pct

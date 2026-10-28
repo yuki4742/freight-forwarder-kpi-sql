@@ -5,7 +5,7 @@ USE forwarder_kpi;
 -- charge_lines (one row per charge line). Each is aggregated to carrier level
 -- first and then joined, so shipment counts are not inflated by the join.
 -- Step 1: schedule - jobs, arrived and on-time counts by carrier
--- Step 2: money    - revenue, cost, job journals and delay costs by carrier
+-- Step 2: money    - revenue, cost, journals and delay costs by carrier
 -- Final:  join on carrier and calculate rates
 WITH schedule AS (
   SELECT
@@ -14,21 +14,21 @@ WITH schedule AS (
     COUNT(ata) AS arrived,                                -- COUNT(column) ignores NULL (in transit)
     SUM(ata <= DATE_ADD(eta, INTERVAL 1 DAY)) AS on_time  -- comparison returns 1 / 0 / NULL
   FROM shipments
-  WHERE origin = 'CNSHA' AND destination = 'USTIW' AND mode = 'FCL'
+  WHERE origin = 'CNSHA' AND destination = 'USTIW' AND load_type = 'FCL'
   GROUP BY carrier_name
 ),
 money AS (
   SELECT
     s.carrier_name,
-    SUM(CASE WHEN c.ledger = 'AR' THEN c.local_amount ELSE 0 END) AS revenue,
-    SUM(CASE WHEN c.ledger = 'AP' THEN c.local_amount ELSE 0 END) AS cost,
-    SUM(CASE WHEN c.ledger = 'JC' THEN c.local_amount ELSE 0 END) AS revenue_journal,
+    SUM(CASE WHEN c.ledger = 'AR' THEN c.amount ELSE 0 END) AS revenue,
+    SUM(CASE WHEN c.ledger = 'AP' THEN c.amount ELSE 0 END) AS cost,
+    SUM(CASE WHEN c.ledger = 'JNL' THEN c.amount ELSE 0 END) AS revenue_journal,
     SUM(CASE WHEN c.ledger = 'AP' AND cc.charge_group = 'Delay-related'
-             THEN c.local_amount ELSE 0 END) AS delay_cost
+             THEN c.amount ELSE 0 END) AS delay_cost
   FROM charge_lines AS c
   JOIN shipments AS s ON c.job_number = s.job_number
   JOIN charge_codes AS cc ON c.charge_code = cc.charge_code
-  WHERE s.origin = 'CNSHA' AND s.destination = 'USTIW' AND s.mode = 'FCL'
+  WHERE s.origin = 'CNSHA' AND s.destination = 'USTIW' AND s.load_type = 'FCL'
   GROUP BY s.carrier_name
 )
 SELECT
@@ -49,10 +49,10 @@ WITH summary AS (
   SELECT
     s.origin,
     s.destination,
-    s.mode,
+    s.load_type,
     c.ledger,
-    c.creditor_debtor,
-    c.local_amount
+    c.counterparty_code,
+    c.amount
   FROM charge_lines AS c
   JOIN shipments AS s
     ON c.job_number = s.job_number
@@ -61,9 +61,9 @@ SELECT
   origin,
   destination,
   ledger,
-  creditor_debtor,
-  SUM(local_amount) AS total_amount
+  counterparty_code,
+  SUM(amount) AS total_amount
 FROM summary
-WHERE origin = 'CNSHA' AND destination = 'USTIW' AND mode = 'FCL'
-GROUP BY origin, destination, ledger, creditor_debtor
-ORDER BY creditor_debtor, ledger;
+WHERE origin = 'CNSHA' AND destination = 'USTIW' AND load_type = 'FCL'
+GROUP BY origin, destination, ledger, counterparty_code
+ORDER BY counterparty_code, ledger;

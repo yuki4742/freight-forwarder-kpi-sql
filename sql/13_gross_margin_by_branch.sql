@@ -1,14 +1,14 @@
 USE forwarder_kpi;
 
 -- Gross margin % by branch
--- Step 1: summary - revenue, cost and job journals by branch
+-- Step 1: summary - revenue, cost and journals by branch
 -- Final:  gross profit and gross margin %
 WITH summary AS (
   SELECT
     branch,
-    SUM(CASE WHEN ledger = 'AR' THEN local_amount ELSE 0 END) AS revenue,
-    SUM(CASE WHEN ledger = 'AP' THEN local_amount ELSE 0 END) AS cost,
-    SUM(CASE WHEN ledger = 'JC' THEN local_amount ELSE 0 END) AS revenue_journal
+    SUM(CASE WHEN ledger = 'AR' THEN amount ELSE 0 END) AS revenue,
+    SUM(CASE WHEN ledger = 'AP' THEN amount ELSE 0 END) AS cost,
+    SUM(CASE WHEN ledger = 'JNL' THEN amount ELSE 0 END) AS revenue_journal
   FROM charge_lines
   GROUP BY branch
 )

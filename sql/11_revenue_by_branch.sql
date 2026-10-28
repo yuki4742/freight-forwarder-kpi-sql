@@ -4,7 +4,7 @@ USE forwarder_kpi;
 -- Credit notes (AR CRD) are negative, so they are included to get net revenue.
 SELECT
   branch,
-  SUM(local_amount) AS revenue
+  SUM(amount) AS revenue
 FROM charge_lines
 WHERE ledger = 'AR'
 GROUP BY branch

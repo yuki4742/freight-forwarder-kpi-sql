@@ -6,7 +6,7 @@ USE forwarder_kpi;
 SELECT * FROM charge_codes;
 
 -- Shipments: optional columns should show NULL for non-FCL / in-transit jobs
-SELECT job_number, mode, container_type, teu, ata
+SELECT job_number, load_type, container_type, teu, ata
 FROM shipments
 LIMIT 5;
 

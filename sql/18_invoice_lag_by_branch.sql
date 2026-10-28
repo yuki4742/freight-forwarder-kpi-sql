@@ -9,9 +9,9 @@ USE forwarder_kpi;
 WITH first_invoice AS (
   SELECT
     job_number,
-    MIN(transaction_date) AS first_invoice_date
+    MIN(doc_date) AS first_invoice_date
   FROM charge_lines
-  WHERE ledger = 'AR' AND type = 'INV'
+  WHERE ledger = 'AR' AND doc_type = 'INV'
   GROUP BY job_number
 ),
 shipment_invoicing AS (

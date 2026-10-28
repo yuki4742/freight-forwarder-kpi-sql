@@ -17,7 +17,7 @@ WITH monthly_jobs AS (
 monthly_revenue AS (
   SELECT
     DATE_FORMAT(s.job_opened_date, '%Y-%m') AS month,
-    SUM(CASE WHEN cl.ledger = 'AR' THEN cl.local_amount ELSE 0 END) AS revenue
+    SUM(CASE WHEN cl.ledger = 'AR' THEN cl.amount ELSE 0 END) AS revenue
   FROM charge_lines AS cl
   JOIN shipments AS s ON s.job_number = cl.job_number
   GROUP BY DATE_FORMAT(s.job_opened_date, '%Y-%m')
