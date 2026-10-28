@@ -1,0 +1,15 @@
+charge_code,description,charge_group
+FRT,Freight,Freight
+FSC,Fuel Surcharge,Surcharge
+SSC,Security Surcharge,Surcharge
+OHAN,Origin Handling,Origin
+ODOC,Origin Documentation,Origin
+OPIC,Origin Pickup,Origin
+DHAN,Destination Handling,Destination
+DDOC,Destination Documentation,Destination
+DDEL,Destination Delivery,Destination
+CUS,Customs Clearance,Customs
+DEM,Demurrage,Delay-related
+DET,Detention,Delay-related
+STOR,Terminal Storage,Delay-related
+WAIT,Truck Waiting Time,Delay-related
