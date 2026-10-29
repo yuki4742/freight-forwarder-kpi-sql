@@ -1,9 +1,11 @@
-# Freight Forwarder KPI Analysis (SQL)
+# Freight Forwarder KPI Analysis (SQL & Tableau)
 
-Business KPI analysis of a **fictional Seattle-based freight forwarder** (branches: Seattle, Portland, Anchorage), built with MySQL.
+Business KPI analysis of a **fictional Seattle-based freight forwarder** (branches: Seattle, Portland, Anchorage), built with MySQL and Tableau.
 The project links shipment data and accounting transactions (AR / AP / journals) by job number to answer one business question:
 
 > **Why is our highest-revenue trade lane the least profitable?**
+
+**📊 Interactive dashboard:** [Lane Profitability on Tableau Public](https://public.tableau.com/app/profile/yuki7444/viz/forwarder_kpi_dashboard/LaneProfitability)
 
 All data is synthetic and was created for this project. It is not derived from any real company's data or from any commercial software, and field names and codes are generic industry terms. Every company, customer, carrier and vendor name is fictional. See [`data/README.md`](data/README.md) for the data dictionary.
 
@@ -123,4 +125,4 @@ Jade Current Line carries about 70% of the lane's volume but generates over 90% 
 
 ## Tools
 
-MySQL 8 · MySQL Workbench · Tableau (dashboard in progress)
+MySQL 8 · MySQL Workbench · Tableau Public
